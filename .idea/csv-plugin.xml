@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CsvFileAttributes">
+    <option name="attributeMap">
+      <map>
+        <entry key="C:\Users\petar\Documents\AndroidStudio\DeviceExplorer\Pixel_3a_XL_API_28 [emulator-5554]\data\data\com.petarsrzentic.insurance\databases\InsuranceDatabase-wal">
+          <value>
+            <Attribute>
+              <option name="escapeCharacter" value="BACKSLASH" />
+            </Attribute>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
