@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Osiguranje</string>
+    <string name="none">ništa</string>
+    <string name="delete_database">Obrisati bazu podataka?</string>
+    <string name="do_you_want_to_delete">Da li želite da obrišete kompletnu bazu podataka?</string>
+    <string name="result">"Rezultat: "</string>
+    <string name="no">Ne</string>
+    <string name="yes">Da</string>
+    <string name="delete_import">Obrisati unos?</string>
+    <string name="ok">Da</string>
+    <string name="create_new_insurance">Kreiraj novo osiguranje</string>
+    <string name="insurance_category">Kategorija Osiguranja</string>
+    <string name="delete_all">Obriši sve</string>
+    <string name="help">Pomoć</string>
+    <string name="export">Izvoz</string>
+    <string name="menu">Meni</string>
+    <string name="date">DATUM</string>
+    <string name="january">Januar</string>
+    <string name="february">Februar</string>
+    <string name="march">Mart</string>
+    <string name="april">April</string>
+    <string name="may">Maj</string>
+    <string name="june">Jun</string>
+    <string name="july">Jul</string>
+    <string name="august">Avgust</string>
+    <string name="september">Septembar</string>
+    <string name="october">Oktobar</string>
+    <string name="november">Novembar</string>
+    <string name="december">Decembar</string>
+    <string name="under_construction">U fazi razvoja! :)</string>
+</resources>

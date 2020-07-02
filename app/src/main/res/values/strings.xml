@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">Insurance</string>
+    <string name="none">none</string>
+    <string name="unos_podataka" translatable="false"><i><b>Unos podataka</b></i>\n\n
+        Unos podataka se vrši tako što se prvo tapne na <i><b>DATE</b></i>, izabere se datum, zatim se unosi broj u polje ,
+<i><b>MSISDN</b></i>. Nakon toga se iz padajućeg menija bira kategorija osiguranja na <i><b>Insurance Category</b></i> i
+        na kraju se kućica <i><b>Hitno 1</b></i> čekira (po potrebi). Unos se završava pritiskom na dugme <i><b>ADD Insurance</b></i>.
+</string>
+    <string name="brisanje_podataka" translatable="false"><i><b>Brisanje podataka</b></i>\n\n
+        Brisanje podataka se obavlja na dva načina:\n
+        1.<i><b>Brisanje jednog reda</b></i>\n
+        Brisanje jednog reda se vrši tako što se tapne i ZADRŽI red koji se želi obrisati.\n
+        <u>Važna napomena:</u> Moguće je brisanje samo zadnjeg unosa\n
+        2.<i><b>Brisanje cele tabele</b></i>\n
+        Brisanje cele tabele radi se tako što se iz menija bira dugme Delete all (Obriši sve).\n
+        Nakon toga je potrebno restartovati aplikaciju kako bi ponovni unos bio ispravan.
+    </string>
+    <string name="delete_database">Delete Database?</string>
+    <string name="do_you_want_to_delete">Do you want to delete complete database?</string>
+    <string name="result">\Result: \</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="delete_import">Do you want to delete?</string>
+    <string name="ok">OK</string>
+    <string name="create_new_insurance">Create new insurance</string>
+    <string name="insurance_category">Insurance Category</string>
+    <string name="delete_all">Delete all</string>
+    <string name="help">Help</string>
+    <string name="export">Export</string>
+    <string name="menu">Menu</string>
+    <string name="date">DATE</string>
+    <string name="january">January</string>
+    <string name="february">February</string>
+    <string name="march">March</string>
+    <string name="april">April</string>
+    <string name="may">May</string>
+    <string name="june">June</string>
+    <string name="july">July</string>
+    <string name="august">August</string>
+    <string name="september">September</string>
+    <string name="october">October</string>
+    <string name="november">November</string>
+    <string name="december">December</string>
+    <string name="under_construction">Under construction! :)</string>
+</resources>
