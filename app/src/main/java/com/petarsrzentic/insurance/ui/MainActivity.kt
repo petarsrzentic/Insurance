@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var insuranceRecyclerViewAdapter: InsuranceRecyclerViewAdapter
     private lateinit var insuranceViewModel: InsuranceViewModel
-    private lateinit var checkBox: CheckBox
+    lateinit var checkBox: CheckBox
     private var insuranceEntity = Insurance()
 
     companion object {
@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+
+        checkBox = findViewById(R.id.editHitno)
 
         loadListOfInsuranceRecordsFromDatabase()
 
@@ -162,7 +164,6 @@ class MainActivity : AppCompatActivity(),
     // Setup add new insurance image click listener
     private fun insurance() {
         insuranceImage.setOnClickListener {
-            checkBox = findViewById(R.id.editHitno)
             if (checkBox.isChecked) {
                 textCheckBox.text = "H1"
                 checkBox.isChecked = false
@@ -184,6 +185,7 @@ class MainActivity : AppCompatActivity(),
                 (R.string.ok)
             ) { _, _ ->
 
+                insuranceEntity.msisdn = editMsisdn.text.toString()
                 if (insuranceEntity.uid != 0) {
                     insuranceViewModel.update(insuranceEntity)
                 } else {
@@ -302,6 +304,9 @@ class MainActivity : AppCompatActivity(),
             checkBox.setChecked(true)
             checkBox.jumpDrawablesToCurrentState()
 
+        } else {
+            checkBox.setChecked(false)
+            checkBox.jumpDrawablesToCurrentState()
         }
 
         when (insuranceEntity.category) {
