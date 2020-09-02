@@ -1,14 +1,10 @@
 package com.petarsrzentic.insurance.ui
 
 import android.app.DatePickerDialog
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.util.Log
+
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -18,8 +14,7 @@ import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
-import androidx.lifecycle.LiveData
+
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,10 +22,8 @@ import com.petarsrzentic.insurance.InsuranceRecyclerViewAdapter
 import com.petarsrzentic.insurance.InsuranceViewModel
 import com.petarsrzentic.insurance.R
 import com.petarsrzentic.insurance.data.Insurance
-import com.petarsrzentic.insurance.data.InsuranceDao
-import com.petarsrzentic.insurance.data.InsuranceRepository
+
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.*
 import java.util.*
 
 class MainActivity : AppCompatActivity(),
@@ -38,15 +31,11 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var insuranceRecyclerViewAdapter: InsuranceRecyclerViewAdapter
     private lateinit var insuranceViewModel: InsuranceViewModel
-    private var priceOfInsurance = 0
     private lateinit var checkBox: CheckBox
-    private lateinit var sharedPreferences: SharedPreferences
+    private var insuranceEntity = Insurance()
 
     companion object {
-        private var sumOfInsurance = arrayListOf<Int>()
-        private var sum = 0
-        private var suma = 0
-        private var suma1 = 0
+        private var totalSumOfInsurances = 0
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,37 +43,41 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+
+        loadListOfInsuranceRecordsFromDatabase()
+
+        calendar()
         spinner()
         insurance()
-        calendar()
-        loadData()
+
     }
 
-    private fun loadData() {
-        sharedPreferences = getSharedPreferences("savedSum", Context.MODE_PRIVATE)
-        sum = sharedPreferences.getInt("zbir", suma)
-        resultText.text = "${getString(R.string.result)}$sum"
-        suma1 = sum
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
     }
 
+    // Load all Insurance records from database and sum them all
+    private fun loadListOfInsuranceRecordsFromDatabase() {
+        insuranceViewModel = ViewModelProvider.AndroidViewModelFactory(application)
+            .create(InsuranceViewModel::class.java)
 
-    private fun summing() {
-        val sumOfInsurance1 = sumOfInsurance
-        sum = sumOfInsurance1.sum() + suma1
-        suma = sum
-        resultText.text = getString(R.string.result)+suma
-        saveData()
+        insuranceRecyclerViewAdapter =
+            InsuranceRecyclerViewAdapter(this, this)
+        recyclerView.adapter = insuranceRecyclerViewAdapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        insuranceViewModel.allInsurance.observe(this, Observer {
+            it.let {
+                insuranceRecyclerViewAdapter.setItems(it)
+                totalSumOfInsurances = 0
+                it.forEach { dbinst -> run { totalSumOfInsurances += dbinst.priceOfInsurance } }
+                resultText.text = getString(R.string.result) + totalSumOfInsurances
+            }
+        })
     }
 
-    private fun saveData() {
-        sharedPreferences = getSharedPreferences("savedSum", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.apply {
-            putInt("zbir", suma)
-        }.apply()
-    }
-
-
+    // Setup calendar element
     private fun calendar() {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
@@ -95,6 +88,7 @@ class MainActivity : AppCompatActivity(),
                 this,
                 DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
                     buttonDate.text = "$dayOfMonth.${month + 1}.$year"
+                    insuranceEntity.date = buttonDate.text.toString()
                 },
                 year,
                 month,
@@ -120,19 +114,7 @@ class MainActivity : AppCompatActivity(),
 
     }
 
-    private fun insurance() {
-        insuranceImage.setOnClickListener {
-            checkBox = findViewById(R.id.editHitno)
-            if (checkBox.isChecked) {
-                textCheckBox.text = "H1"
-                checkBox.isChecked = false
-            } else {
-                textCheckBox.text = ""
-            }
-            creator()
-        }
-    }
-
+    // Setup insurance category select list
     private fun spinner() {
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
@@ -143,14 +125,15 @@ class MainActivity : AppCompatActivity(),
             ) {
                 textSpinner.text = parent?.getItemAtPosition(position).toString().apply {
                     when (position) {
-                        1 -> priceOfInsurance = 130
-                        2 -> priceOfInsurance = 250
-                        3 -> priceOfInsurance = 400
-                        4 -> priceOfInsurance = 600
-                        5 -> priceOfInsurance = 800
-                        6 -> priceOfInsurance = 1000
+                        1 -> insuranceEntity.priceOfInsurance = 130
+                        2 -> insuranceEntity.priceOfInsurance = 250
+                        3 -> insuranceEntity.priceOfInsurance = 400
+                        4 -> insuranceEntity.priceOfInsurance = 600
+                        5 -> insuranceEntity.priceOfInsurance = 800
+                        6 -> insuranceEntity.priceOfInsurance = 1000
                     }
                 }
+                insuranceEntity.category = textSpinner.text.toString()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -158,7 +141,15 @@ class MainActivity : AppCompatActivity(),
             }
         }
         val pickInsurance =
-            arrayOf(getString(R.string.insurance_category), "cat-1", "cat-2", "cat-3", "cat-4", "cat-5", "cat-6")
+            arrayOf(
+                getString(R.string.insurance_category),
+                "cat-1",
+                "cat-2",
+                "cat-3",
+                "cat-4",
+                "cat-5",
+                "cat-6"
+            )
         val adapter =
             ArrayAdapter(
                 this,
@@ -166,27 +157,56 @@ class MainActivity : AppCompatActivity(),
             )
         spinner.adapter = adapter
 
-        insuranceViewModel = ViewModelProvider.AndroidViewModelFactory(application)
-            .create(InsuranceViewModel::class.java)
+    }
 
-        insuranceRecyclerViewAdapter =
-            InsuranceRecyclerViewAdapter(this, this)
-        recyclerView.adapter = insuranceRecyclerViewAdapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
+    // Setup add new insurance image click listener
+    private fun insurance() {
+        insuranceImage.setOnClickListener {
+            checkBox = findViewById(R.id.editHitno)
+            if (checkBox.isChecked) {
+                textCheckBox.text = "H1"
+                checkBox.isChecked = false
 
-        insuranceViewModel.allInsurance.observe(this, Observer {
-            it.let {
-                insuranceRecyclerViewAdapter.setItems(it)
+            } else {
+                textCheckBox.text = ""
+            }
+            insuranceEntity.hitno = textCheckBox.text.toString()
+            creator()
+        }
+    }
+
+    // Create new insurance record
+    private fun creator() {
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.create_new_insurance))
+            .setPositiveButton(
+                (R.string.ok)
+            ) { _, _ ->
+
+                if (insuranceEntity.uid != 0) {
+                    insuranceViewModel.update(insuranceEntity)
+                } else {
+                    insuranceViewModel.insert(insuranceEntity)
+                }
 
             }
-        })
-
+            .create()
+            .show()
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu, menu)
-        return true
+    // Delete insurance record
+    override fun onHold(item: Insurance) {
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.delete_import))
+            .setPositiveButton(getString(R.string.ok), object : DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface?, which: Int) {
+                    insuranceViewModel.delete(item)
+                }
+            }).show()
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -195,19 +215,21 @@ class MainActivity : AppCompatActivity(),
                 AlertDialog.Builder(this)
                     .setTitle(getString(R.string.delete_database))
                     .setMessage(getString(R.string.do_you_want_to_delete))
-                    .setPositiveButton(getString(R.string.yes), object : DialogInterface.OnClickListener {
-                        override fun onClick(dialog: DialogInterface?, which: Int) {
-                            insuranceViewModel.deleteAll()
-                            sharedPreferences.edit().clear().apply()
-                            sum = 0
-                            resultText.text = "${getString(R.string.result)}$sum"
-                        }
-                    })
-                    .setNegativeButton(getString(R.string.no), object : DialogInterface.OnClickListener {
-                        override fun onClick(dialog: DialogInterface?, which: Int) {
-                            return
-                        }
-                    })
+                    .setPositiveButton(
+                        getString(R.string.yes),
+                        object : DialogInterface.OnClickListener {
+                            override fun onClick(dialog: DialogInterface?, which: Int) {
+                                insuranceViewModel.deleteAll()
+                                loadListOfInsuranceRecordsFromDatabase()
+                            }
+                        })
+                    .setNegativeButton(
+                        getString(R.string.no),
+                        object : DialogInterface.OnClickListener {
+                            override fun onClick(dialog: DialogInterface?, which: Int) {
+                                return
+                            }
+                        })
                     .show()
                 true
             }
@@ -217,7 +239,8 @@ class MainActivity : AppCompatActivity(),
             }
             R.id.action_backup -> {
 //                exportCSV()
-                Toast.makeText(this, getString(R.string.under_construction), Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.under_construction), Toast.LENGTH_LONG)
+                    .show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -267,46 +290,29 @@ class MainActivity : AppCompatActivity(),
         startActivity(intent)
     }
 
-    override fun onClick(item: Insurance) {}
+    override fun onClick(item: Insurance) {
+        insuranceEntity = item
+        buttonDate.setText(insuranceEntity.date)
+        editMsisdn.setText(insuranceEntity.msisdn)
+        insuranceEntity.priceOfInsurance
 
-    override fun onHold(item: Insurance) {
+        spinner.setSelection(1)
 
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.delete_import))
-            .setPositiveButton(getString(R.string.ok), object : DialogInterface.OnClickListener {
-                override fun onClick(dialog: DialogInterface?, which: Int) {
-                    insuranceViewModel.delete(item)
-                    sumOfInsurance.remove(priceOfInsurance)
-                    insuranceViewModel.update(item)
-                    summing()
-                }
-            }).show()
+        if(insuranceEntity.hitno.equals("H1")){
+            checkBox.setChecked(true)
+            checkBox.jumpDrawablesToCurrentState()
 
+        }
+
+        when (insuranceEntity.category) {
+            "cat-1" -> spinner.setSelection(1)
+            "cat-2" -> spinner.setSelection(2)
+            "cat-3" -> spinner.setSelection(3)
+            "cat-4" -> spinner.setSelection(4)
+            "cat-5" -> spinner.setSelection(5)
+            "cat-6" -> spinner.setSelection(6)
+        }
     }
 
-    private fun creator() {
-
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.create_new_insurance))
-            .setPositiveButton(
-                (R.string.ok)
-            ) { _, _ ->
-                val created = Insurance(
-                    0,
-                    buttonDate.text.toString(),
-                    editMsisdn.text.toString(),
-                    textSpinner.text.toString(),
-                    textCheckBox.text.toString(),
-                    priceOfInsurance
-                )
-                sumOfInsurance.add(priceOfInsurance)
-                summing()
-                insuranceViewModel.insert(created)
-                insuranceViewModel.update(created)
-            }
-            .create()
-            .show()
-
-    }
 
 }
