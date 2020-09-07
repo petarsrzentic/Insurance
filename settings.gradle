@@ -1,2 +1,5 @@
+include ':poi-3.9'
+include ':poi-ooxml-3.9'
+include ':poi-ooxml-schemas-3.9'
 rootProject.name='Insurance'
 include ':app'

@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -14,7 +13,6 @@ import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,16 +20,21 @@ import com.petarsrzentic.insurance.InsuranceRecyclerViewAdapter
 import com.petarsrzentic.insurance.InsuranceViewModel
 import com.petarsrzentic.insurance.R
 import com.petarsrzentic.insurance.data.Insurance
-
 import kotlinx.android.synthetic.main.activity_main.*
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.Sheet
+import java.io.File
+import java.io.FileOutputStream
 import java.util.*
+
 
 class MainActivity : AppCompatActivity(),
     InsuranceRecyclerViewAdapter.TouchEvent {
 
     private lateinit var insuranceRecyclerViewAdapter: InsuranceRecyclerViewAdapter
     private lateinit var insuranceViewModel: InsuranceViewModel
-    lateinit var checkBox: CheckBox
+    private lateinit var checkBox: CheckBox
     private var insuranceEntity = Insurance()
 
     companion object {
@@ -189,6 +192,13 @@ class MainActivity : AppCompatActivity(),
                 if (insuranceEntity.uid != 0) {
                     insuranceViewModel.update(insuranceEntity)
                 } else {
+                    if (insuranceEntity.date == "") {
+                        Toast.makeText(this, "Insert date", Toast.LENGTH_LONG).show()
+                        return@setPositiveButton
+                    }else if (insuranceEntity.category == "" || insuranceEntity.category == "Insurance Category") {
+                        Toast.makeText(this, "Insert category", Toast.LENGTH_LONG).show()
+                        return@setPositiveButton
+                    }
                     insuranceViewModel.insert(insuranceEntity)
                 }
 
@@ -203,11 +213,9 @@ class MainActivity : AppCompatActivity(),
 
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.delete_import))
-            .setPositiveButton(getString(R.string.ok), object : DialogInterface.OnClickListener {
-                override fun onClick(dialog: DialogInterface?, which: Int) {
-                    insuranceViewModel.delete(item)
-                }
-            }).show()
+            .setPositiveButton(
+                getString(R.string.ok)
+            ) { _, _ -> insuranceViewModel.delete(item) }.show()
 
     }
 
@@ -218,20 +226,14 @@ class MainActivity : AppCompatActivity(),
                     .setTitle(getString(R.string.delete_database))
                     .setMessage(getString(R.string.do_you_want_to_delete))
                     .setPositiveButton(
-                        getString(R.string.yes),
-                        object : DialogInterface.OnClickListener {
-                            override fun onClick(dialog: DialogInterface?, which: Int) {
-                                insuranceViewModel.deleteAll()
-                                loadListOfInsuranceRecordsFromDatabase()
-                            }
-                        })
+                        getString(R.string.yes)
+                    ) { _, _ ->
+                        insuranceViewModel.deleteAll()
+                        loadListOfInsuranceRecordsFromDatabase()
+                    }
                     .setNegativeButton(
                         getString(R.string.no),
-                        object : DialogInterface.OnClickListener {
-                            override fun onClick(dialog: DialogInterface?, which: Int) {
-                                return
-                            }
-                        })
+                        DialogInterface.OnClickListener { _, _ -> return@OnClickListener })
                     .show()
                 true
             }
@@ -240,53 +242,72 @@ class MainActivity : AppCompatActivity(),
                 true
             }
             R.id.action_backup -> {
-//                exportCSV()
+                exportToExcel()
                 Toast.makeText(this, getString(R.string.under_construction), Toast.LENGTH_LONG)
                     .show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
-
     }
 
+    private fun exportToExcel() {
 
-//    private fun exportCSV(dao: InsuranceDao) {
-//    val dbPath = InsuranceRepository(dao).allInsurance
-//    Log.i("InsuranceDao", "$dbPath")
-//        val dbPath = applicationContext.getDatabasePath("InsuranceDatabase.db")
-////        val dataDirectory = InsuranceRepository().allInsurance
-//        val dataString = StringBuilder()
-//        dataString.append("Date, MSISDN, Category, Hitno, Price of Insurance\n${dbPath.absoluteFile}")
-////        dataString.append(dataDirectory)
-////
-//        try {
-//            //saving the file into device
-//            val out: FileOutputStream = openFileOutput("data.csv", Context.MODE_PRIVATE)
-//            out.write(dataString.toString().toByteArray())
-//            out.close()
-//            //exporting
-////            shareResult()
-//            val context: Context = applicationContext
-//            val filelocation = File(filesDir, "data.csv")
-//            val path: Uri = FileProvider.getUriForFile(
-//                context,
-//                "com.petarsrzentic.exportdatabase.Fileprovider",
-//                filelocation
-//            )
-//            val fileIntent = Intent(Intent.ACTION_SEND)
-//            fileIntent.type = "text/csv"
-//            fileIntent.putExtra(Intent.EXTRA_SUBJECT, "Data")
-//            fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//            fileIntent.putExtra(Intent.EXTRA_STREAM, path)
-//            startActivity(Intent.createChooser(fileIntent, "Send data"))
-//
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
-//
-//}
+        insuranceViewModel = ViewModelProvider.AndroidViewModelFactory(application)
+            .create(InsuranceViewModel::class.java)
+        val list = insuranceViewModel.allInsurance
 
+        val wb = HSSFWorkbook()
+        var cell: Cell?
+
+        //Now we are creating sheet
+        var sheet: Sheet? = null
+        sheet = wb.createSheet("Table of Insurance")
+        //Now column and row
+        val row = sheet.createRow(0)
+
+        cell = row.createCell(0)
+        cell.setCellValue("Date")
+        //cell.cellStyle = cellStyle
+
+        cell = row.createCell(1)
+        cell.setCellValue("MSISDN")
+        //cell.cellStyle = cellStyle
+
+        cell = row.createCell(2)
+        cell.setCellValue("Category")
+
+        cell = row.createCell(3)
+        cell.setCellValue("HITNO 1")
+
+        cell = row.createCell(4)
+        cell.setCellValue("Price")
+
+        sheet.setColumnWidth(0, 10 * 300)
+        sheet.setColumnWidth(1, 10 * 300)
+        sheet.setColumnWidth(2, 10 * 300)
+        sheet.setColumnWidth(3, 10 * 300)
+        sheet.setColumnWidth(4, 10 * 300)
+
+        val file = File(getExternalFilesDir("Insurance"), "Insurance.xls")
+        val outputStream: FileOutputStream? = null
+
+        try {
+            val outputStream = FileOutputStream(file)
+            wb.write(outputStream)
+            Toast.makeText(applicationContext, "Successful", Toast.LENGTH_LONG).show()
+        }catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(applicationContext, "Not Successful", Toast.LENGTH_LONG).show()
+            try {
+                outputStream?.close()
+            }catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        }
+    }
+    
+    // Help file
     private fun showHelp() {
         val intent = Intent(this, HelpActivity::class.java)
         startActivity(intent)
@@ -294,18 +315,18 @@ class MainActivity : AppCompatActivity(),
 
     override fun onClick(item: Insurance) {
         insuranceEntity = item
-        buttonDate.setText(insuranceEntity.date)
+        buttonDate.text = insuranceEntity.date
         editMsisdn.setText(insuranceEntity.msisdn)
         insuranceEntity.priceOfInsurance
 
         spinner.setSelection(1)
 
         if(insuranceEntity.hitno.equals("H1")){
-            checkBox.setChecked(true)
+            checkBox.isChecked = true
             checkBox.jumpDrawablesToCurrentState()
 
         } else {
-            checkBox.setChecked(false)
+            checkBox.isChecked = false
             checkBox.jumpDrawablesToCurrentState()
         }
 
