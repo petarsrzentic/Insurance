@@ -2,7 +2,6 @@ package com.petarsrzentic.insurance.data
 
 import android.os.AsyncTask
 import androidx.lifecycle.LiveData
-import java.util.*
 
 class InsuranceRepository(private val insuranceDao: InsuranceDao) {
 

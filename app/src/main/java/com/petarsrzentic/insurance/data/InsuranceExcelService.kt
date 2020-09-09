@@ -2,7 +2,7 @@ package com.petarsrzentic.insurance.data
 
 import android.util.Log
 
-class InsuranceExcelService(val insuDao: InsuranceDao) {
+class InsuranceExcelService(private val insuDao: InsuranceDao) {
 
     private fun createExcel () {
 //        //iscitaj tablu Insurance koristeci InsuraceRepository

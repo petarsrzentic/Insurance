@@ -397,7 +397,7 @@ class MainActivity : AppCompatActivity(),
 
         spinner.setSelection(1)
 
-        if (insuranceEntity.hitno.equals("H1")) {
+        if (insuranceEntity.hitno == "H1") {
             checkBox.isChecked = true
             checkBox.jumpDrawablesToCurrentState()
 
