@@ -3,6 +3,9 @@ package com.petarsrzentic.insurance.ui
 import android.app.DatePickerDialog
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -13,6 +16,8 @@ import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,6 +36,10 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(),
     InsuranceRecyclerViewAdapter.TouchEvent {
+
+    private val storageWritePermission = 101
+    private val storageReadPermission = 202
+
 
     private lateinit var insuranceRecyclerViewAdapter: InsuranceRecyclerViewAdapter
     private lateinit var insuranceViewModel: InsuranceViewModel
@@ -54,6 +63,70 @@ class MainActivity : AppCompatActivity(),
         calendar()
         spinner()
         insurance()
+
+    }
+
+    private fun checkPermissions(permission: String, name: String, requestCode: Int) {
+        if (Build.VERSION.SDK_INT >= M) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    applicationContext,
+                    permission
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    Toast.makeText(applicationContext, "Permission granted!", Toast.LENGTH_LONG)
+                        .show()
+                }
+                shouldShowRequestPermissionRationale(permission) -> showDialog(
+                    permission,
+                    name,
+                    requestCode
+                )
+
+                else -> ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(permission),
+                    requestCode
+                )
+            }
+        }
+    }
+
+    private fun showDialog(permission: String, name: String, requestCode: Int) {
+        val builder = AlertDialog.Builder(this)
+        builder.apply {
+            setMessage("Permission to access your storage is required to use this application")
+            setTitle("Permission required")
+            setPositiveButton("OK") { dialog, witch ->
+                ActivityCompat.requestPermissions(
+                    this@MainActivity,
+                    arrayOf(permission),
+                    requestCode
+                )
+            }
+        }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        fun innerCheck(name: String) {
+            if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(applicationContext, "$name permission refused", Toast.LENGTH_LONG)
+                    .show()
+            } else {
+                Toast.makeText(applicationContext, "$name permission granted", Toast.LENGTH_LONG)
+                    .show()
+            }
+        }
+
+        when (requestCode) {
+            storageWritePermission -> innerCheck("Storage Write")
+            storageReadPermission -> innerCheck("Storage Read")
+        }
 
     }
 
@@ -195,7 +268,7 @@ class MainActivity : AppCompatActivity(),
                     if (insuranceEntity.date == "") {
                         Toast.makeText(this, "Insert date", Toast.LENGTH_LONG).show()
                         return@setPositiveButton
-                    }else if (insuranceEntity.category == "" || insuranceEntity.category == "Insurance Category") {
+                    } else if (insuranceEntity.category == "" || insuranceEntity.category == "Insurance Category") {
                         Toast.makeText(this, "Insert category", Toast.LENGTH_LONG).show()
                         return@setPositiveButton
                     }
@@ -242,9 +315,12 @@ class MainActivity : AppCompatActivity(),
                 true
             }
             R.id.action_backup -> {
+                checkPermissions(
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    "Write External Storage",
+                    storageWritePermission
+                )
                 exportToExcel()
-                Toast.makeText(this, getString(R.string.under_construction), Toast.LENGTH_LONG)
-                    .show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -289,24 +365,24 @@ class MainActivity : AppCompatActivity(),
         sheet.setColumnWidth(3, 10 * 300)
         sheet.setColumnWidth(4, 10 * 300)
 
-        val file = File(getExternalFilesDir("Insurance"), "Insurance.xls")
+        val file = File(getExternalFilesDir("Insurance")?.absolutePath, "Insurance.xls")
         val outputStream: FileOutputStream? = null
 
         try {
-            val outputStream = FileOutputStream(file)
-            wb.write(outputStream)
+            val outputStreams = FileOutputStream(file)
+            wb.write(outputStreams)
             Toast.makeText(applicationContext, "Successful", Toast.LENGTH_LONG).show()
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(applicationContext, "Not Successful", Toast.LENGTH_LONG).show()
             try {
                 outputStream?.close()
-            }catch (ex: Exception) {
+            } catch (ex: Exception) {
                 ex.printStackTrace()
             }
         }
     }
-    
+
     // Help file
     private fun showHelp() {
         val intent = Intent(this, HelpActivity::class.java)
@@ -321,7 +397,7 @@ class MainActivity : AppCompatActivity(),
 
         spinner.setSelection(1)
 
-        if(insuranceEntity.hitno.equals("H1")){
+        if (insuranceEntity.hitno.equals("H1")) {
             checkBox.isChecked = true
             checkBox.jumpDrawablesToCurrentState()
 
