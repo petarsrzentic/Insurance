@@ -3,22 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_item"
-        android:icon="@drawable/ic_add_box_red"
-        android:title="@string/menu"
-        app:showAsAction="always">
+        android:id="@+id/delete_all"
+        android:title="@string/delete_all" />
 
-        <item
-            android:id="@+id/delete_all"
-            android:title="@string/delete_all" />
+    <item
+        android:id="@+id/action_help"
+        android:title="@string/help" />
 
-        <item
-            android:id="@+id/action_help"
-            android:title="@string/help" />
-
-        <item
-            android:id="@+id/action_backup"
-            android:title="@string/export" />
-
-    </item>
+    <item
+        android:id="@+id/action_backup"
+        android:title="@string/export" />
 </menu>

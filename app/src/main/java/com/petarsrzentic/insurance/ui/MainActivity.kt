@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
+import android.os.Environment
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -26,16 +27,19 @@ import com.petarsrzentic.insurance.InsuranceViewModel
 import com.petarsrzentic.insurance.R
 import com.petarsrzentic.insurance.data.Insurance
 import kotlinx.android.synthetic.main.activity_main.*
-import org.apache.poi.hssf.usermodel.HSSFWorkbook
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.Sheet
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.util.*
 
 
 class MainActivity : AppCompatActivity(),
     InsuranceRecyclerViewAdapter.TouchEvent {
+
+    private val filename = "SampleFile.txt"
+    private val filepath = "MyFileStorage"
+    var myExternalFile: File? = null
+    var myData = ""
 
     private val storageWritePermission = 101
     private val storageReadPermission = 202
@@ -50,6 +54,25 @@ class MainActivity : AppCompatActivity(),
         private var totalSumOfInsurances = 0
     }
 
+    private val isExternalStorageReadOnly: Boolean
+        get() {
+            val extStorageState = Environment.getExternalStorageState()
+            return if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
+                true
+            } else {
+                false
+            }
+        }
+    private val isExternalStorageAvailable: Boolean
+        get() {
+            val extStorageState = Environment.getExternalStorageState()
+            return if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
+                true
+            } else {
+                false
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -58,7 +81,21 @@ class MainActivity : AppCompatActivity(),
 
         checkBox = findViewById(R.id.editHitno)
 
-        loadListOfInsuranceRecordsFromDatabase()
+        insuranceRecyclerViewAdapter =
+            InsuranceRecyclerViewAdapter(this, this)
+        recyclerView.adapter = insuranceRecyclerViewAdapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        insuranceViewModel = ViewModelProvider(this).get(InsuranceViewModel::class.java)
+        insuranceViewModel.allInsurance.observe(this, Observer { listOfInsuranceRecords ->
+            // Update the cached copy of the words in the adapter.
+            listOfInsuranceRecords?.let {
+                run {
+                    insuranceRecyclerViewAdapter.setItems(listOfInsuranceRecords)
+                    sumListOfInsuranceRecordsFromDatabase(listOfInsuranceRecords)
+                }
+            }
+        })
 
         calendar()
         spinner()
@@ -135,24 +172,10 @@ class MainActivity : AppCompatActivity(),
         return true
     }
 
-    // Load all Insurance records from database and sum them all
-    private fun loadListOfInsuranceRecordsFromDatabase() {
-        insuranceViewModel = ViewModelProvider.AndroidViewModelFactory(application)
-            .create(InsuranceViewModel::class.java)
-
-        insuranceRecyclerViewAdapter =
-            InsuranceRecyclerViewAdapter(this, this)
-        recyclerView.adapter = insuranceRecyclerViewAdapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
-        insuranceViewModel.allInsurance.observe(this, Observer {
-            it.let {
-                insuranceRecyclerViewAdapter.setItems(it)
-                totalSumOfInsurances = 0
-                it.forEach { dbinst -> run { totalSumOfInsurances += dbinst.priceOfInsurance } }
-                resultText.text = getString(R.string.result) + totalSumOfInsurances
-            }
-        })
+    private fun sumListOfInsuranceRecordsFromDatabase(listOfInsuranceRecords: List<Insurance>) {
+        totalSumOfInsurances = 0
+        listOfInsuranceRecords.forEach { dbinst -> run { totalSumOfInsurances += dbinst.priceOfInsurance } }
+        resultText.text = getString(R.string.result) + totalSumOfInsurances
     }
 
     // Setup calendar element
@@ -302,7 +325,6 @@ class MainActivity : AppCompatActivity(),
                         getString(R.string.yes)
                     ) { _, _ ->
                         insuranceViewModel.deleteAll()
-                        loadListOfInsuranceRecordsFromDatabase()
                     }
                     .setNegativeButton(
                         getString(R.string.no),
@@ -319,68 +341,47 @@ class MainActivity : AppCompatActivity(),
                     android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     "Write External Storage",
                     storageWritePermission
+
                 )
-                exportToExcel()
+                generateExcel()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun exportToExcel() {
+    private fun generateExcel() {
 
-        insuranceViewModel = ViewModelProvider.AndroidViewModelFactory(application)
-            .create(InsuranceViewModel::class.java)
-        val list = insuranceViewModel.allInsurance
+        !isExternalStorageAvailable || isExternalStorageReadOnly
 
-        val wb = HSSFWorkbook()
-        var cell: Cell?
+        if (isExternalStorageAvailable) {
 
-        //Now we are creating sheet
-        var sheet: Sheet? = null
-        sheet = wb.createSheet("Table of Insurance")
-        //Now column and row
-        val row = sheet.createRow(0)
+            if (!isExternalStorageReadOnly) {
+                try {
+                    myExternalFile = File(getExternalFilesDir(filepath), filename)
+                    val fileOutPutStream = FileOutputStream(myExternalFile)
+                    fileOutPutStream.write("File text".toByteArray())
+                    fileOutPutStream.close()
+                    Toast.makeText(applicationContext, "Excel report created", Toast.LENGTH_SHORT).show()
+                } catch (e: IOException) {
+                    Toast.makeText(applicationContext, "Error creating excel report", Toast.LENGTH_SHORT).show()
 
-        cell = row.createCell(0)
-        cell.setCellValue("Date")
-        //cell.cellStyle = cellStyle
+                    e.printStackTrace()
+                }
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    "External storage is read only",
+                    Toast.LENGTH_LONG
+                ).show()
 
-        cell = row.createCell(1)
-        cell.setCellValue("MSISDN")
-        //cell.cellStyle = cellStyle
-
-        cell = row.createCell(2)
-        cell.setCellValue("Category")
-
-        cell = row.createCell(3)
-        cell.setCellValue("HITNO 1")
-
-        cell = row.createCell(4)
-        cell.setCellValue("Price")
-
-        sheet.setColumnWidth(0, 10 * 300)
-        sheet.setColumnWidth(1, 10 * 300)
-        sheet.setColumnWidth(2, 10 * 300)
-        sheet.setColumnWidth(3, 10 * 300)
-        sheet.setColumnWidth(4, 10 * 300)
-
-        val file = File(getExternalFilesDir("Insurance")?.absolutePath, "Insurance.xls")
-        val outputStream: FileOutputStream? = null
-
-        try {
-            val outputStreams = FileOutputStream(file)
-            wb.write(outputStreams)
-            Toast.makeText(applicationContext, "Successful", Toast.LENGTH_LONG).show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(applicationContext, "Not Successful", Toast.LENGTH_LONG).show()
-            try {
-                outputStream?.close()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
             }
+
+        } else {
+            Toast.makeText(applicationContext, "External storage not available", Toast.LENGTH_LONG)
+                .show()
         }
+
     }
 
     // Help file
