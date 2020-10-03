@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -27,6 +28,9 @@ import com.petarsrzentic.insurance.InsuranceViewModel
 import com.petarsrzentic.insurance.R
 import com.petarsrzentic.insurance.data.Insurance
 import kotlinx.android.synthetic.main.activity_main.*
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.Sheet
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -39,7 +43,7 @@ class MainActivity : AppCompatActivity(),
     private val filename = "SampleFile.txt"
     private val filepath = "MyFileStorage"
     var myExternalFile: File? = null
-    var myData = ""
+    var listOfInsuranceRecords: List<Insurance>? = null;
 
     private val storageWritePermission = 101
     private val storageReadPermission = 202
@@ -93,6 +97,7 @@ class MainActivity : AppCompatActivity(),
                 run {
                     insuranceRecyclerViewAdapter.setItems(listOfInsuranceRecords)
                     sumListOfInsuranceRecordsFromDatabase(listOfInsuranceRecords)
+                    this.listOfInsuranceRecords = listOfInsuranceRecords
                 }
             }
         })
@@ -170,6 +175,25 @@ class MainActivity : AppCompatActivity(),
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
         return true
+    }
+
+
+    // Load all Insurance records from database and sum them all
+    private fun loadListOfInsuranceRecordsFromDatabase(): List<Insurance> {
+        var listOfInsuranceRecords: List<Insurance>? = null;
+        insuranceViewModel = ViewModelProvider.AndroidViewModelFactory(application)
+            .create(InsuranceViewModel::class.java)
+
+        insuranceRecyclerViewAdapter =
+            InsuranceRecyclerViewAdapter(this, this)
+        recyclerView.adapter = insuranceRecyclerViewAdapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        insuranceViewModel.allInsurance.observe(this, Observer {
+            listOfInsuranceRecords = it
+
+        })
+        return listOfInsuranceRecords!!
     }
 
     private fun sumListOfInsuranceRecordsFromDatabase(listOfInsuranceRecords: List<Insurance>) {
@@ -343,7 +367,8 @@ class MainActivity : AppCompatActivity(),
                     storageWritePermission
 
                 )
-                generateExcel()
+                exportToExcel()
+                // generateExcel()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -362,9 +387,9 @@ class MainActivity : AppCompatActivity(),
                     val fileOutPutStream = FileOutputStream(myExternalFile)
                     fileOutPutStream.write("File text".toByteArray())
                     fileOutPutStream.close()
-                    Toast.makeText(applicationContext, "Excel report created", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, "data save", Toast.LENGTH_SHORT).show()
                 } catch (e: IOException) {
-                    Toast.makeText(applicationContext, "Error creating excel report", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, "data not saved", Toast.LENGTH_SHORT).show()
 
                     e.printStackTrace()
                 }
@@ -382,6 +407,86 @@ class MainActivity : AppCompatActivity(),
                 .show()
         }
 
+    }
+
+
+    private fun exportToExcel() {
+
+        Log.d("TAG", "List of insurances: " + (this.listOfInsuranceRecords?.size ?: null))
+
+        val wb = HSSFWorkbook()
+        var cell: Cell?
+
+        //Now we are creating sheet
+        var sheet: Sheet? = null
+        sheet = wb.createSheet("Table of Insurance")
+        //Now column and row
+        val row = sheet.createRow(0)
+
+        cell = row.createCell(0)
+        cell.setCellValue("Date")
+        //cell.cellStyle = cellStyle
+
+        cell = row.createCell(1)
+        cell.setCellValue("MSISDN")
+        //cell.cellStyle = cellStyle
+
+        cell = row.createCell(2)
+        cell.setCellValue("Category")
+
+        cell = row.createCell(3)
+        cell.setCellValue("HITNO 1")
+
+        cell = row.createCell(4)
+        cell.setCellValue("Price")
+
+        sheet.setColumnWidth(0, 10 * 300)
+        sheet.setColumnWidth(1, 10 * 300)
+        sheet.setColumnWidth(2, 10 * 300)
+        sheet.setColumnWidth(3, 10 * 300)
+        sheet.setColumnWidth(4, 10 * 300)
+
+        var rowIndex = 1;
+
+        listOfInsuranceRecords?.forEach { insuranceRecord ->
+            run {
+                val row = sheet.createRow(rowIndex++)
+
+                var cell: Cell = row.createCell(0)
+                cell.setCellValue(insuranceRecord.date)
+                //cell.cellStyle = cellStyle
+
+                cell = row.createCell(1)
+                cell.setCellValue(insuranceRecord.msisdn)
+                //cell.cellStyle = cellStyle
+
+                cell = row.createCell(2)
+                cell.setCellValue(insuranceRecord.category)
+
+                cell = row.createCell(3)
+                cell.setCellValue(insuranceRecord.hitno)
+
+                cell = row.createCell(4)
+                cell.setCellValue(insuranceRecord.priceOfInsurance.toString())
+            }
+        }
+
+        val file = File(getExternalFilesDir("Insurance")?.absolutePath, "Insurance.xls")
+        val outputStream: FileOutputStream? = null
+
+        try {
+            val outputStreams = FileOutputStream(file)
+            wb.write(outputStreams)
+            Toast.makeText(applicationContext, "Successful", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(applicationContext, "Not Successful", Toast.LENGTH_LONG).show()
+            try {
+                outputStream?.close()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        }
     }
 
     // Help file
