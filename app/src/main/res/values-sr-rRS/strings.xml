@@ -29,4 +29,12 @@
     <string name="november">Novembar</string>
     <string name="december">Decembar</string>
     <string name="under_construction">U fazi razvoja! :)</string>
+    <string name="permission_required">Za korišćenje ove aplikacije potrebna je dozvola za pristup vašem skladištu</string>
+    <string name="permission">Potrebna dozvola</string>
+    <string name="insert_date">Unesi datum</string>
+    <string name="data_saved">Podaci sačuvani</string>
+    <string name="data_not_saved">Podaci nisu sačuvani</string>
+    <string name="insert_category">"Unesi kategoriju "</string>
+    <string name="successful">Uspešno</string>
+    <string name="not_successful">Neuspešno</string>
 </resources>

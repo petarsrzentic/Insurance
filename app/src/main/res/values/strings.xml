@@ -4,13 +4,23 @@
     <string name="unos_podataka" translatable="false"><i><b>Unos podataka</b></i>\n\n
         Unos podataka se vrši tako što se prvo tapne na <i><b>DATE</b></i>, izabere se datum, zatim se unosi broj u polje ,
 <i><b>MSISDN</b></i>. Nakon toga se iz padajućeg menija bira kategorija osiguranja na <i><b>Insurance Category</b></i> i
-        na kraju se kućica <i><b>Hitno 1</b></i> čekira (po potrebi). Unos se završava pritiskom na dugme <i><b>ADD Insurance</b></i>.
+        na kraju se kućica <i><b>Hitno 1</b></i> čekira (po potrebi). Unos se završava pritiskom na dugme <i><b>ADD Insurance</b></i>.\n
+        Ukoliko datum i/ili kategorija osiguranja nije unet aplikacija neće dozvoliti da se podaci sačuvaju.
 </string>
+    <string name="cuvanje_podataka" translatable="false"><i><b>Čuvanje podataka</b></i>\n\n
+        Klikom na dugme Export and save (izvoz i čuvanje), generiše se Excel tabela sa unetim podacima na lokaciji:\n
+        <i><b>Internal Storage/Android/data/com.petarsrzentic.insurance/files/Insurance/Insurance.xls</b></i>
+
+    </string>
+
+<!--    <string name="lokacija" translatable="false">-->
+<!--        <a href="/sdcard/Android/data/com.petarsrzentic.insurance/files/Insurance">OVDE!</a>-->
+<!--    </string>-->
+
     <string name="brisanje_podataka" translatable="false"><i><b>Brisanje podataka</b></i>\n\n
-        Brisanje podataka se obavlja na dva načina:\n
+        Brisanje podataka se obavlja na dva načina:\n\n
         1.<i><b>Brisanje jednog reda</b></i>\n
-        Brisanje jednog reda se vrši tako što se tapne i ZADRŽI red koji se želi obrisati.\n
-        <u>Važna napomena:</u> Moguće je brisanje samo zadnjeg unosa\n
+        Brisanje jednog reda se vrši tako što se tapne i ZADRŽI red koji se želi obrisati.\n\n
         2.<i><b>Brisanje cele tabele</b></i>\n
         Brisanje cele tabele radi se tako što se iz menija bira dugme Delete all (Obriši sve).\n
         Nakon toga je potrebno restartovati aplikaciju kako bi ponovni unos bio ispravan.
@@ -26,7 +36,7 @@
     <string name="insurance_category">Insurance Category</string>
     <string name="delete_all">Delete all</string>
     <string name="help">Help</string>
-    <string name="export">Export</string>
+    <string name="export">Export and save</string>
     <string name="menu">Menu</string>
     <string name="date">DATE</string>
     <string name="january">January</string>
@@ -42,4 +52,12 @@
     <string name="november">November</string>
     <string name="december">December</string>
     <string name="under_construction">Under construction! :)</string>
+    <string name="permission_required">Permission to access your storage is required to use this application</string>
+    <string name="permission">Permission required</string>
+    <string name="insert_date">Insert date</string>
+    <string name="data_not_saved">Data not saved</string>
+    <string name="data_saved">Data saved</string>
+    <string name="successful">Successful</string>
+    <string name="not_successful">Not Successful</string>
+    <string name="insert_category">Insert category</string>
 </resources>

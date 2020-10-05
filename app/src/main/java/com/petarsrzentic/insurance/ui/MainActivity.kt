@@ -4,11 +4,11 @@ import android.app.DatePickerDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
 import android.os.Environment
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -20,6 +20,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.core.content.FileProvider.*
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,7 +45,8 @@ class MainActivity : AppCompatActivity(),
     private val filename = "SampleFile.txt"
     private val filepath = "MyFileStorage"
     var myExternalFile: File? = null
-    var listOfInsuranceRecords: List<Insurance>? = null;
+    var listOfInsuranceRecords: List<Insurance>? = null
+    var count = 0
 
     private val storageWritePermission = 101
     private val storageReadPermission = 202
@@ -61,20 +64,12 @@ class MainActivity : AppCompatActivity(),
     private val isExternalStorageReadOnly: Boolean
         get() {
             val extStorageState = Environment.getExternalStorageState()
-            return if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
-                true
-            } else {
-                false
-            }
+            return Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)
         }
     private val isExternalStorageAvailable: Boolean
         get() {
             val extStorageState = Environment.getExternalStorageState()
-            return if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
-                true
-            } else {
-                false
-            }
+            return Environment.MEDIA_MOUNTED.equals(extStorageState)
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -116,7 +111,6 @@ class MainActivity : AppCompatActivity(),
                     permission
                 ) == PackageManager.PERMISSION_GRANTED -> {
                     Toast.makeText(applicationContext, "Permission granted!", Toast.LENGTH_LONG)
-                        .show()
                 }
                 shouldShowRequestPermissionRationale(permission) -> showDialog(
                     permission,
@@ -136,8 +130,8 @@ class MainActivity : AppCompatActivity(),
     private fun showDialog(permission: String, name: String, requestCode: Int) {
         val builder = AlertDialog.Builder(this)
         builder.apply {
-            setMessage("Permission to access your storage is required to use this application")
-            setTitle("Permission required")
+            setMessage(getString(R.string.permission_required))
+            setTitle(getString(R.string.permission))
             setPositiveButton("OK") { dialog, witch ->
                 ActivityCompat.requestPermissions(
                     this@MainActivity,
@@ -161,7 +155,6 @@ class MainActivity : AppCompatActivity(),
                     .show()
             } else {
                 Toast.makeText(applicationContext, "$name permission granted", Toast.LENGTH_LONG)
-                    .show()
             }
         }
 
@@ -313,10 +306,10 @@ class MainActivity : AppCompatActivity(),
                     insuranceViewModel.update(insuranceEntity)
                 } else {
                     if (insuranceEntity.date == "") {
-                        Toast.makeText(this, "Insert date", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.insert_date), Toast.LENGTH_LONG).show()
                         return@setPositiveButton
                     } else if (insuranceEntity.category == "" || insuranceEntity.category == "Insurance Category") {
-                        Toast.makeText(this, "Insert category", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.insert_category), Toast.LENGTH_LONG).show()
                         return@setPositiveButton
                     }
                     insuranceViewModel.insert(insuranceEntity)
@@ -368,7 +361,7 @@ class MainActivity : AppCompatActivity(),
 
                 )
                 exportToExcel()
-                // generateExcel()
+
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -387,9 +380,17 @@ class MainActivity : AppCompatActivity(),
                     val fileOutPutStream = FileOutputStream(myExternalFile)
                     fileOutPutStream.write("File text".toByteArray())
                     fileOutPutStream.close()
-                    Toast.makeText(applicationContext, "data save", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        applicationContext,
+                        getString(R.string.data_saved),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } catch (e: IOException) {
-                    Toast.makeText(applicationContext, "data not saved", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        applicationContext,
+                        getString(R.string.data_not_saved),
+                        Toast.LENGTH_SHORT
+                    ).show()
 
                     e.printStackTrace()
                 }
@@ -412,10 +413,11 @@ class MainActivity : AppCompatActivity(),
 
     private fun exportToExcel() {
 
-        Log.d("TAG", "List of insurances: " + (this.listOfInsuranceRecords?.size ?: null))
+        //Log.d("TAG", "List of insurances: " + (this.listOfInsuranceRecords?.size ?: null))
 
         val wb = HSSFWorkbook()
         var cell: Cell?
+        count++
 
         //Now we are creating sheet
         var sheet: Sheet? = null
@@ -471,22 +473,27 @@ class MainActivity : AppCompatActivity(),
             }
         }
 
-        val file = File(getExternalFilesDir("Insurance")?.absolutePath, "Insurance.xls")
+        val file = File(getExternalFilesDir("Insurance")?.absolutePath, "Insurance_$count.xls")
         val outputStream: FileOutputStream? = null
 
         try {
             val outputStreams = FileOutputStream(file)
             wb.write(outputStreams)
-            Toast.makeText(applicationContext, "Successful", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, getString(R.string.successful), Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(applicationContext, "Not Successful", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                applicationContext,
+                getString(R.string.not_successful),
+                Toast.LENGTH_LONG
+            ).show()
             try {
                 outputStream?.close()
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
         }
+
     }
 
     // Help file

@@ -11,12 +11,13 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        app:titleTextColor="@android:color/transparent"
         android:layout_height="?attr/actionBarSize"
         android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="@+id/monthText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textCheckBox"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:titleTextColor="@android:color/transparent" />
 
     <TextView
         android:id="@+id/monthText"
@@ -39,7 +40,6 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="450dp"
-        android:layout_marginStart="5dp"
         android:background="@drawable/a1_logo_red"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

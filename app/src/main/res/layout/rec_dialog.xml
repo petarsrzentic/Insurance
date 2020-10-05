@@ -68,7 +68,6 @@
         android:id="@+id/textInsPrice"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
-        android:layout_marginStart="15dp"
         android:gravity="center"
         android:text="1000"
         android:textColor="@color/primaryColor"
@@ -76,8 +75,6 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/textHitno"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/textHitno"
         app:layout_constraintTop_toTopOf="@+id/textHitno"
         app:layout_constraintVertical_bias="0.0" />
 
