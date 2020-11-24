@@ -1,14 +1,14 @@
 package com.petarsrzentic.insurance.ui
 
-import android.app.DatePickerDialog
+import android.app.*
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
-import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -20,7 +20,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.core.content.FileProvider.*
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -29,6 +28,7 @@ import com.petarsrzentic.insurance.InsuranceRecyclerViewAdapter
 import com.petarsrzentic.insurance.InsuranceViewModel
 import com.petarsrzentic.insurance.R
 import com.petarsrzentic.insurance.data.Insurance
+import com.petarsrzentic.insurance.receiver.AlarmReceiver
 import kotlinx.android.synthetic.main.activity_main.*
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Cell
@@ -44,9 +44,9 @@ class MainActivity : AppCompatActivity(),
 
     private val filename = "SampleFile.txt"
     private val filepath = "MyFileStorage"
-    var myExternalFile: File? = null
-    var listOfInsuranceRecords: List<Insurance>? = null
-    var count = 0
+    private var myExternalFile: File? = null
+    private var listOfInsuranceRecords: List<Insurance>? = null
+    private var count = 0
 
     private val storageWritePermission = 101
     private val storageReadPermission = 202
@@ -64,12 +64,12 @@ class MainActivity : AppCompatActivity(),
     private val isExternalStorageReadOnly: Boolean
         get() {
             val extStorageState = Environment.getExternalStorageState()
-            return Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)
+            return Environment.MEDIA_MOUNTED_READ_ONLY == extStorageState
         }
     private val isExternalStorageAvailable: Boolean
         get() {
             val extStorageState = Environment.getExternalStorageState()
-            return Environment.MEDIA_MOUNTED.equals(extStorageState)
+            return Environment.MEDIA_MOUNTED == extStorageState
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity(),
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         insuranceViewModel = ViewModelProvider(this).get(InsuranceViewModel::class.java)
-        insuranceViewModel.allInsurance.observe(this, Observer { listOfInsuranceRecords ->
+        insuranceViewModel.allInsurance.observe(this, { listOfInsuranceRecords ->
             // Update the cached copy of the words in the adapter.
             listOfInsuranceRecords?.let {
                 run {
@@ -101,38 +101,66 @@ class MainActivity : AppCompatActivity(),
         spinner()
         insurance()
 
+        createChannel()
+
+    }
+
+    private fun createChannel() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.insurance_channelName)
+            val descriptionText = getString(R.string.channel_description)
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(
+                R.string.insurance_id.toString(), name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+
+            Log.d("TAG", "create channel")
+
+        }
+
+    }
+
+    private fun startBroadcasting() {
+        val intent = Intent(this, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, 1, intent, 0)
+        val alarm = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarm.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 345600000, pendingIntent )
+        Log.d("TAG", "startBroadcasting")
     }
 
     private fun checkPermissions(permission: String, name: String, requestCode: Int) {
-        if (Build.VERSION.SDK_INT >= M) {
-            when {
-                ContextCompat.checkSelfPermission(
-                    applicationContext,
-                    permission
-                ) == PackageManager.PERMISSION_GRANTED -> {
-                    Toast.makeText(applicationContext, "Permission granted!", Toast.LENGTH_LONG)
-                }
-                shouldShowRequestPermissionRationale(permission) -> showDialog(
-                    permission,
-                    name,
-                    requestCode
-                )
-
-                else -> ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(permission),
-                    requestCode
-                )
+        when {
+            ContextCompat.checkSelfPermission(
+                applicationContext,
+                permission
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                Toast.makeText(applicationContext, "Permission granted!", Toast.LENGTH_LONG)
             }
+            shouldShowRequestPermissionRationale(permission) -> showDialog(
+                permission,
+                requestCode
+            )
+
+            else -> ActivityCompat.requestPermissions(
+                this,
+                arrayOf(permission),
+                requestCode
+            )
         }
     }
 
-    private fun showDialog(permission: String, name: String, requestCode: Int) {
+    private fun showDialog(permission: String, requestCode: Int) {
         val builder = AlertDialog.Builder(this)
         builder.apply {
             setMessage(getString(R.string.permission_required))
             setTitle(getString(R.string.permission))
-            setPositiveButton("OK") { dialog, witch ->
+            setPositiveButton("OK") { _, _ ->
                 ActivityCompat.requestPermissions(
                     this@MainActivity,
                     arrayOf(permission),
@@ -173,7 +201,7 @@ class MainActivity : AppCompatActivity(),
 
     // Load all Insurance records from database and sum them all
     private fun loadListOfInsuranceRecordsFromDatabase(): List<Insurance> {
-        var listOfInsuranceRecords: List<Insurance>? = null;
+        var listOfInsuranceRecords: List<Insurance>? = null
         insuranceViewModel = ViewModelProvider.AndroidViewModelFactory(application)
             .create(InsuranceViewModel::class.java)
 
@@ -182,7 +210,7 @@ class MainActivity : AppCompatActivity(),
         recyclerView.adapter = insuranceRecyclerViewAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        insuranceViewModel.allInsurance.observe(this, Observer {
+        insuranceViewModel.allInsurance.observe(this, {
             listOfInsuranceRecords = it
 
         })
@@ -204,7 +232,7 @@ class MainActivity : AppCompatActivity(),
         buttonDate.setOnClickListener {
             val datePicker = DatePickerDialog(
                 this,
-                DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+                { _, year, month, dayOfMonth ->
                     buttonDate.text = "$dayOfMonth.${month + 1}.$year"
                     insuranceEntity.date = buttonDate.text.toString()
                 },
@@ -281,7 +309,7 @@ class MainActivity : AppCompatActivity(),
     private fun insurance() {
         insuranceImage.setOnClickListener {
             if (checkBox.isChecked) {
-                textCheckBox.text = "H1"
+                textCheckBox.text = getString(R.string.h1)
                 checkBox.isChecked = false
 
             } else {
@@ -318,7 +346,7 @@ class MainActivity : AppCompatActivity(),
             }
             .create()
             .show()
-
+            startBroadcasting()
     }
 
     // Delete insurance record
@@ -358,7 +386,6 @@ class MainActivity : AppCompatActivity(),
                     android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     "Write External Storage",
                     storageWritePermission
-
                 )
                 exportToExcel()
 
@@ -420,7 +447,7 @@ class MainActivity : AppCompatActivity(),
         count++
 
         //Now we are creating sheet
-        var sheet: Sheet? = null
+        val sheet: Sheet?
         sheet = wb.createSheet("Table of Insurance")
         //Now column and row
         val row = sheet.createRow(0)
@@ -448,7 +475,7 @@ class MainActivity : AppCompatActivity(),
         sheet.setColumnWidth(3, 10 * 300)
         sheet.setColumnWidth(4, 10 * 300)
 
-        var rowIndex = 1;
+        var rowIndex = 1
 
         listOfInsuranceRecords?.forEach { insuranceRecord ->
             run {

@@ -37,4 +37,10 @@
     <string name="insert_category">"Unesi kategoriju "</string>
     <string name="successful">Uspešno</string>
     <string name="not_successful">Neuspešno</string>
+    <string name="nismo_se_videli">Nismo se videli neko vreme ;)</string>
+    <string name="popravka_u_neovlascenom_servisu">Da li znaš da je popravka u neovlašćenom servisu rizična?</string>
+    <string name="popravka_nije_uvek_moguca">Da li znaš da popravka u neovlašćenom servisu nije uvek moguća?</string>
+    <string name="lom_telefona_u_prvoj_godini">Da li znaš da jedna od tri osobe polomi telefon u prvoj godini korišćenja?</string>
+    <string name="neovlasceni_servis_rizican">Prvih nekoliko meseci korišćenja telefona su najrizičniji!</string>
+    <string name="vip_prvi_uveo_osiguranje">Da li znaš da je VIP prvi uveo osiguranje telefona?</string>
 </resources>

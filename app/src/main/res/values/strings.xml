@@ -60,4 +60,14 @@
     <string name="successful">Successful</string>
     <string name="not_successful">Not Successful</string>
     <string name="insert_category">Insert category</string>
+    <string name="nismo_se_videli">We have not seen you in a while ;)</string>
+    <string name="popravka_u_neovlascenom_servisu">Did you know that repair at an unauthorized service is risky?</string>
+    <string name="popravka_nije_uvek_moguca">Did you know that repair at an unauthorized service is not always possible?</string>
+    <string name="lom_telefona_u_prvoj_godini">Did you know that one in three people break a phone in their first year?</string>
+    <string name="neovlasceni_servis_rizican">The first few months of using the phone are the most risky!</string>
+    <string name="vip_prvi_uveo_osiguranje">Did you know that VIP was the first to introduce phone insurance?</string>
+    <string name="insurance_id" translatable="false">Insurance_id</string>
+    <string name="insurance_channelName" translatable="false">Insurance_channel</string>
+    <string name="h1" translatable="false">H1</string>
+    <string name="channel_description" translatable="false">Insurance_channel_description</string>
 </resources>
