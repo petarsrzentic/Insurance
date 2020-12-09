@@ -11,11 +11,12 @@
     <ImageView
         android:id="@+id/imageView_insurance_head"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="250dp"
         android:paddingLeft="7dp"
-        app:srcCompat="@drawable/insurance_head"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/insurance_head" />
 
     <ScrollView
         android:id="@+id/scrollView2"
