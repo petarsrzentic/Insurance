@@ -13,9 +13,9 @@
 
     </string>
 
-<!--    <string name="lokacija" translatable="false">-->
-<!--        <a href="/sdcard/Android/data/com.petarsrzentic.insurance/files/Insurance">OVDE!</a>-->
-<!--    </string>-->
+    <!--    <string name="lokacija" translatable="false">-->
+    <!--        <a href="/sdcard/Android/data/com.petarsrzentic.insurance/files/Insurance">OVDE!</a>-->
+    <!--    </string>-->
 
     <string name="brisanje_podataka" translatable="false"><i><b>Brisanje podataka</b></i>\n\n
         Brisanje podataka se obavlja na dva načina:\n\n
