@@ -40,7 +40,9 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="450dp"
+        android:layout_marginBottom="10dp"
         android:background="@drawable/a1_logo_red"
+        app:layout_constraintBottom_toTopOf="@+id/insuranceImage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/monthText"
@@ -151,6 +153,7 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/spinner"
+        app:layout_constraintHorizontal_bias="0.269"
         app:layout_constraintStart_toStartOf="@+id/spinner"
         app:layout_constraintTop_toBottomOf="@+id/spinner" />
 

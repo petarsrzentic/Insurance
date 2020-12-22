@@ -12,16 +12,11 @@
         motion:pathMotionArc="startVertical">
        <KeyFrameSet>
            <KeyAttribute />
-           <KeyAttribute
-               motion:motionTarget="@+id/imageView3"
-               motion:framePosition="80"
-               android:alpha="0" />
+           <KeyAttribute />
            <KeyAttribute />
 
            <KeyAttribute
-               motion:motionTarget="@+id/imageView3"
-               motion:framePosition="20"
-               android:alpha="1" />
+               motion:motionTarget="@+id/imageView3" />
        </KeyFrameSet>
     </Transition>
 
