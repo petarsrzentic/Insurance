@@ -70,4 +70,8 @@
     <string name="insurance_channelName" translatable="false">Insurance_channel</string>
     <string name="h1" translatable="false">H1</string>
     <string name="channel_description" translatable="false">Insurance_channel_description</string>
+    <string name="month">Month</string>
+    <string name="msisdn" translatable="false">MSISDN</string>
+    <string name="spinner" translatable="false">spinner</string>
+    <string name="hitno_1" translatable="false">Hitno 1</string>
 </resources>

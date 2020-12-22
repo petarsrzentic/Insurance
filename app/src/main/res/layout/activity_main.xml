@@ -27,7 +27,7 @@
         android:layout_marginBottom="5dp"
         android:gravity="center"
         android:paddingBottom="2dp"
-        android:text="Month"
+        android:text="@string/month"
         android:textSize="20sp"
         android:textStyle="bold"
         android:visibility="invisible"
@@ -40,9 +40,7 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="450dp"
-        android:layout_marginBottom="10dp"
         android:background="@drawable/a1_logo_red"
-        app:layout_constraintBottom_toTopOf="@+id/insuranceImage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/monthText"
@@ -80,7 +78,8 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/editMsisdn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recyclerView" />
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView"
+        android:focusable="true" />
 
     <EditText
         android:id="@+id/editMsisdn"
@@ -91,14 +90,15 @@
         android:clickable="true"
         android:elevation="5dp"
         android:gravity="center"
-        android:hint="MSISDN"
+        android:hint="@string/msisdn"
         android:inputType="phone"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/spinner"
         app:layout_constraintEnd_toEndOf="@+id/buttonDate"
         app:layout_constraintStart_toStartOf="@+id/buttonDate"
-        app:layout_constraintTop_toBottomOf="@+id/buttonDate" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonDate"
+        android:focusable="true" />
 
     <Spinner
         android:id="@+id/spinner"
@@ -115,7 +115,8 @@
         app:layout_constraintBottom_toTopOf="@id/editHitno"
         app:layout_constraintEnd_toEndOf="@+id/editMsisdn"
         app:layout_constraintStart_toStartOf="@+id/editMsisdn"
-        app:layout_constraintTop_toBottomOf="@+id/editMsisdn" />
+        app:layout_constraintTop_toBottomOf="@+id/editMsisdn"
+        android:focusable="true" />
 
     <TextView
         android:id="@+id/textCheckBox"
@@ -133,7 +134,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="10sp"
-        android:text="spinner"
+        android:text="@string/spinner"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/editHitno"
@@ -148,7 +149,7 @@
         android:background="@drawable/round_button"
         android:elevation="5dp"
         android:paddingStart="10dp"
-        android:text="Hitno 1"
+        android:text="@string/hitno_1"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"

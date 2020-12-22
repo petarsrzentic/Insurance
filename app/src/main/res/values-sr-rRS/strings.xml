@@ -43,4 +43,5 @@
     <string name="lom_telefona_u_prvoj_godini">Da li znaš da jedna od tri osobe polomi telefon u prvoj godini korišćenja?</string>
     <string name="neovlasceni_servis_rizican">Prvih nekoliko meseci korišćenja telefona su najrizičniji!</string>
     <string name="vip_prvi_uveo_osiguranje">Da li znaš da je VIP prvi uveo osiguranje telefona?</string>
+    <string name="month">Month</string>
 </resources>
