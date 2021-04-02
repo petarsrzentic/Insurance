@@ -21,21 +21,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider.*
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.petarsrzentic.insurance.InsuranceRecyclerViewAdapter
-import com.petarsrzentic.insurance.InsuranceViewModel
-import com.petarsrzentic.insurance.R
+import com.petarsrzentic.insurance.*
 import com.petarsrzentic.insurance.data.Insurance
 import com.petarsrzentic.insurance.receiver.AlarmReceiver
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.rec_dialog.*
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Sheet
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.util.*
 
 
@@ -112,7 +109,8 @@ class MainActivity : AppCompatActivity(),
             val descriptionText = getString(R.string.channel_description)
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(
-                R.string.insurance_id.toString(), name, importance).apply {
+                R.string.insurance_id.toString(), name, importance
+            ).apply {
                 description = descriptionText
             }
             val notificationManager =
@@ -128,13 +126,14 @@ class MainActivity : AppCompatActivity(),
     private fun startBroadcasting() {
         val intent = Intent(this, AlarmReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
-            this, 1, intent, 0)
+            this, 1, intent, 0
+        )
         val alarm = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarm.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 345600000, pendingIntent )
+        alarm.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 345600000, pendingIntent)
         Log.d("TAG", "startBroadcasting")
     }
 
-    private fun checkPermissions(permission: String, name: String, requestCode: Int) {
+    private fun checkPermissions(permission: String, requestCode: Int) {
         when {
             ContextCompat.checkSelfPermission(
                 applicationContext,
@@ -181,8 +180,6 @@ class MainActivity : AppCompatActivity(),
             if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(applicationContext, "$name permission refused", Toast.LENGTH_LONG)
                     .show()
-            } else {
-                Toast.makeText(applicationContext, "$name permission granted", Toast.LENGTH_LONG)
             }
         }
 
@@ -216,6 +213,8 @@ class MainActivity : AppCompatActivity(),
         })
         return listOfInsuranceRecords!!
     }
+
+
 
     private fun sumListOfInsuranceRecordsFromDatabase(listOfInsuranceRecords: List<Insurance>) {
         totalSumOfInsurances = 0
@@ -334,10 +333,12 @@ class MainActivity : AppCompatActivity(),
                     insuranceViewModel.update(insuranceEntity)
                 } else {
                     if (insuranceEntity.date == "") {
-                        Toast.makeText(this, getString(R.string.insert_date), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.insert_date), Toast.LENGTH_LONG)
+                            .show()
                         return@setPositiveButton
                     } else if (insuranceEntity.category == "" || insuranceEntity.category == "Insurance Category") {
-                        Toast.makeText(this, getString(R.string.insert_category), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.insert_category), Toast.LENGTH_LONG)
+                            .show()
                         return@setPositiveButton
                     }
                     insuranceViewModel.insert(insuranceEntity)
@@ -346,7 +347,7 @@ class MainActivity : AppCompatActivity(),
             }
             .create()
             .show()
-            startBroadcasting()
+        startBroadcasting()
     }
 
     // Delete insurance record
@@ -384,64 +385,19 @@ class MainActivity : AppCompatActivity(),
             R.id.action_backup -> {
                 checkPermissions(
                     android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    "Write External Storage",
                     storageWritePermission
                 )
                 exportToExcel()
-
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun generateExcel() {
-
-        !isExternalStorageAvailable || isExternalStorageReadOnly
-
-        if (isExternalStorageAvailable) {
-
-            if (!isExternalStorageReadOnly) {
-                try {
-                    myExternalFile = File(getExternalFilesDir(filepath), filename)
-                    val fileOutPutStream = FileOutputStream(myExternalFile)
-                    fileOutPutStream.write("File text".toByteArray())
-                    fileOutPutStream.close()
-                    Toast.makeText(
-                        applicationContext,
-                        getString(R.string.data_saved),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } catch (e: IOException) {
-                    Toast.makeText(
-                        applicationContext,
-                        getString(R.string.data_not_saved),
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                    e.printStackTrace()
-                }
-            } else {
-                Toast.makeText(
-                    applicationContext,
-                    "External storage is read only",
-                    Toast.LENGTH_LONG
-                ).show()
-
-            }
-
-        } else {
-            Toast.makeText(applicationContext, "External storage not available", Toast.LENGTH_LONG)
-                .show()
-        }
-
-    }
-
-
     private fun exportToExcel() {
 
         //Log.d("TAG", "List of insurances: " + (this.listOfInsuranceRecords?.size ?: null))
-
+        val context = applicationContext
         val wb = HSSFWorkbook()
         var cell: Cell?
         count++
@@ -500,25 +456,30 @@ class MainActivity : AppCompatActivity(),
             }
         }
 
-        val file = File(getExternalFilesDir("Insurance")?.absolutePath, "Insurance_$count.xls")
+        val file = getFileStreamPath("insurance_$count")
         val outputStream: FileOutputStream? = null
 
         try {
             val outputStreams = FileOutputStream(file)
             wb.write(outputStreams)
-            Toast.makeText(applicationContext, getString(R.string.successful), Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(
-                applicationContext,
-                getString(R.string.not_successful),
-                Toast.LENGTH_LONG
-            ).show()
-            try {
+        }
+        try {
                 outputStream?.close()
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
+        try {
+            val path = getUriForFile(context, "com.petarsrzentic.insurance.fileprovider", file)
+            val fileIntent = Intent(Intent.ACTION_SEND)
+            fileIntent.type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            fileIntent.putExtra(Intent.EXTRA_SUBJECT, "Insurance_$count")
+            fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            fileIntent.putExtra(Intent.EXTRA_STREAM, path)
+            startActivity(Intent.createChooser(fileIntent, "Send mail"))
+        } catch (e: Exception) {
+            e.message
         }
 
     }

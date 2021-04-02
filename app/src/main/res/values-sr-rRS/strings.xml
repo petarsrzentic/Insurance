@@ -4,7 +4,7 @@
     <string name="none">ništa</string>
     <string name="delete_database">Obrisati bazu podataka?</string>
     <string name="do_you_want_to_delete">Da li želite da obrišete kompletnu bazu podataka?</string>
-    <string name="result">"Ukupno: "</string>
+    <string name="result">"Zbir: "</string>
     <string name="no">Ne</string>
     <string name="yes">Da</string>
     <string name="delete_import">Obrisati unos?</string>
